@@ -39,6 +39,7 @@ const convertStateObjectToResponseObject = dbObject => {
 const convertDistrictObjectToResponseObject = dbObject => {
   return {
     districtId: dbObject.district_id,
+    stateId: dbObject.state_id,
     districtName: dbObject.district_name,
     cases: dbObject.cases,
     cured: dbObject.cured,
@@ -134,8 +135,14 @@ app.get(
   async (request, response) => {
     const {districtId} = request.params
     const getDistrictQuery = `SELECT * FROM district WHERE district_id = ${districtId};`
-    const districtArray = await db.get(getDistrictQuery)
-    response.send(convertDistrictObjectToResponseObject(districtArray))
+    const district = await db.get(getDistrictQuery)
+
+    if (district === undefined) {
+      response.status(401)
+      response.send('District Not Found')
+    } else {
+      response.send(convertDistrictObjectToResponseObject(district))
+    }
   },
 )
 
